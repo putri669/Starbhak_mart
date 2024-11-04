@@ -52,7 +52,7 @@ class _HomePageState extends State<HomePage> {
     });
 
     switch (index) {
-      case 1: // Cart
+      case 1: // Cart Screen
         Navigator.push(
           context,
           MaterialPageRoute(
