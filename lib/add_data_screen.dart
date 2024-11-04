@@ -1,4 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'dart:typed_data';
 
 class ProductForm extends StatefulWidget {
   const ProductForm({Key? key}) : super(key: key);
@@ -10,7 +14,29 @@ class ProductForm extends StatefulWidget {
 class _ProductFormState extends State<ProductForm> {
   final _formKey = GlobalKey<FormState>();
   String? _selectedCategory = 'Makanan';
-  
+  Uint8List? _webImage; // Untuk menyimpan gambar dalam format Uint8List
+  File? _selectedImage; // Untuk aplikasi mobile
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      // Jika aplikasi di web
+      if (kIsWeb) {
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _webImage = bytes;
+        });
+      } else {
+        // Jika aplikasi di Android/iOS
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +50,7 @@ class _ProductFormState extends State<ProductForm> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.person_outline, color: Colors.lightBlue,),
+            icon: Icon(Icons.person_outline, color: Colors.lightBlue),
             onPressed: () {},
           ),
         ],
@@ -37,7 +63,7 @@ class _ProductFormState extends State<ProductForm> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildLabel('Nama Produk'),
-              TextFormField(
+              TextField(
                 decoration: InputDecoration(
                   hintText: 'Masukan nama produk',
                   filled: true,
@@ -52,7 +78,7 @@ class _ProductFormState extends State<ProductForm> {
               SizedBox(height: 16),
               
               _buildLabel('Harga'),
-              TextFormField(
+              TextField(
                 decoration: InputDecoration(
                   hintText: 'Masukan Harga',
                   filled: true,
@@ -95,26 +121,44 @@ class _ProductFormState extends State<ProductForm> {
               SizedBox(height: 16),
               
               _buildLabel('Image'),
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 204, 203, 203),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: 'Choose file',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 204, 203, 203),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  readOnly: true,
-                  onTap: () {
-                    // Add image picker functionality here
-                  },
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _webImage != null || _selectedImage != null
+                            ? 'File Selected'
+                            : 'Choose file',
+                        style: TextStyle(color: Colors.black54),
+                      ),
+                      Icon(Icons.attach_file, color: Colors.black54),
+                    ],
+                  ),
                 ),
               ),
+              if (_webImage != null) // Tampilkan gambar yang dipilih untuk Web
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Image.memory(
+                    _webImage!,
+                    height: 150,
+                  ),
+                )
+              else if (_selectedImage != null) // Tampilkan gambar yang dipilih untuk Android/iOS
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Image.file(
+                    _selectedImage!,
+                    height: 150,
+                  ),
+                ),
               SizedBox(height: 24),
               
               ElevatedButton(

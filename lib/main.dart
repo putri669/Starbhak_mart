@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:food_ordering_app/add_data_screen.dart';
+import 'package:food_ordering_app/add_screen.dart';
 import 'package:food_ordering_app/cart_screen.dart';
 
 void main() {
@@ -59,11 +60,11 @@ class _HomePageState extends State<HomePage> {
           ),
         );
         break;
-      case 2: // Orders
+      case 2: // Ordersf
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductForm(),
+            builder: (context) => AddScreen(),
           ),
         );
         break;
